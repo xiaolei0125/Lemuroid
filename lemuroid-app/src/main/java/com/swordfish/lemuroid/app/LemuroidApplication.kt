@@ -8,11 +8,13 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.google.android.material.color.DynamicColors
 import com.swordfish.lemuroid.app.shared.covers.CoverUtils
+import com.swordfish.lemuroid.app.shared.library.LibraryIndexScheduler
 import com.swordfish.lemuroid.app.shared.startup.GameProcessInitializer
 import com.swordfish.lemuroid.app.shared.startup.MainProcessInitializer
 import com.swordfish.lemuroid.app.utils.android.isMainProcess
 import com.swordfish.lemuroid.ext.feature.context.ContextHandler
 import com.swordfish.lemuroid.lib.injection.HasWorkerInjector
+import com.swordfish.lemuroid.lib.library.LemuroidLibrary
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.DaggerApplication
@@ -22,9 +24,16 @@ class LemuroidApplication : DaggerApplication(), HasWorkerInjector, ImageLoaderF
     @Inject
     lateinit var workerInjector: DispatchingAndroidInjector<ListenableWorker>
 
+    @Inject
+    lateinit var lemuroidLibrary: LemuroidLibrary
+
     @SuppressLint("CheckResult")
     override fun onCreate() {
         super.onCreate()
+
+        // 注册直接扫描入口：在 WorkManager 不可用（device-protected storage ROM）
+        // 时，让 LibraryIndexScheduler 能直接执行库扫描。
+        LibraryIndexScheduler.directLibrary = lemuroidLibrary
 
         val initializeComponent =
             if (isMainProcess()) {
