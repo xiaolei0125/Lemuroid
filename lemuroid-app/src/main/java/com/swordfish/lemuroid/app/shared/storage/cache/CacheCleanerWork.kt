@@ -6,10 +6,10 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.swordfish.lemuroid.app.mobile.feature.settings.SettingsManager
+import com.swordfish.lemuroid.app.utils.android.WorkManagerGuard
 import com.swordfish.lemuroid.lib.injection.AndroidWorkerInjection
 import com.swordfish.lemuroid.lib.injection.WorkerKey
 import com.swordfish.lemuroid.lib.storage.cache.CacheCleaner
@@ -61,7 +61,7 @@ class CacheCleanerWork(
         private const val CLEAN_EVERYTHING: String = "CLEAN_EVERYTHING"
 
         fun enqueueCleanCacheLRU(applicationContext: Context) {
-            WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+            WorkManagerGuard.getInstanceOrNull(applicationContext)?.enqueueUniqueWork(
                 UNIQUE_WORK_ID,
                 ExistingWorkPolicy.APPEND,
                 OneTimeWorkRequestBuilder<CacheCleanerWork>().build(),
@@ -69,13 +69,15 @@ class CacheCleanerWork(
         }
 
         fun cancelCleanCacheLRU(applicationContext: Context) {
-            WorkManager.getInstance(applicationContext).cancelUniqueWork(UNIQUE_WORK_ID)
+            WorkManagerGuard.getInstanceOrNull(applicationContext)
+                ?.cancelUniqueWork(UNIQUE_WORK_ID)
         }
 
         fun enqueueCleanCacheAll(applicationContext: Context) {
+            val workManager = WorkManagerGuard.getInstanceOrNull(applicationContext) ?: return
             val inputData: Data = workDataOf(CLEAN_EVERYTHING to true)
 
-            WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+            workManager.enqueueUniqueWork(
                 UNIQUE_WORK_ID,
                 ExistingWorkPolicy.APPEND,
                 OneTimeWorkRequestBuilder<CacheCleanerWork>()

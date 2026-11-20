@@ -2,8 +2,8 @@ package com.swordfish.lemuroid.app.shared.library
 
 import android.content.Context
 import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.swordfish.lemuroid.app.shared.savesync.SaveSyncWork
+import com.swordfish.lemuroid.app.utils.android.WorkManagerGuard
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -45,7 +45,9 @@ class PendingOperationsMonitor(private val appContext: Context) {
     }
 
     private fun operationInProgress(operation: Operation): Flow<Boolean> {
-        return WorkManager.getInstance(appContext)
+        val workManager = WorkManagerGuard.getInstanceOrNull(appContext)
+            ?: return WorkManagerGuard.emptyWorkInfoFlow().map { false }
+        return workManager
             .getWorkInfosForUniqueWorkFlow(operation.uniqueId)
             .map { if (operation.isPeriodic) isPeriodicJobRunning(it) else isJobRunning(it) }
     }

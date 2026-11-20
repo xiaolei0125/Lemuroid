@@ -10,11 +10,11 @@ import androidx.work.ListenableWorker
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.swordfish.lemuroid.app.mobile.feature.settings.SettingsManager
 import com.swordfish.lemuroid.app.mobile.shared.NotificationsManager
+import com.swordfish.lemuroid.app.utils.android.WorkManagerGuard
 import com.swordfish.lemuroid.app.utils.android.createSyncForegroundInfo
 import com.swordfish.lemuroid.lib.injection.AndroidWorkerInjection
 import com.swordfish.lemuroid.lib.injection.WorkerKey
@@ -95,9 +95,10 @@ class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
         private const val IS_AUTO = "IS_AUTO"
 
         fun enqueueManualWork(applicationContext: Context) {
+            val workManager = WorkManagerGuard.getInstanceOrNull(applicationContext) ?: return
             val inputData: Data = workDataOf(IS_AUTO to false)
 
-            WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+            workManager.enqueueUniqueWork(
                 UNIQUE_WORK_ID,
                 ExistingWorkPolicy.REPLACE,
                 OneTimeWorkRequestBuilder<SaveSyncWork>()
@@ -110,9 +111,10 @@ class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
             applicationContext: Context,
             delayMinutes: Long = 0,
         ) {
+            val workManager = WorkManagerGuard.getInstanceOrNull(applicationContext) ?: return
             val inputData: Data = workDataOf(IS_AUTO to true)
 
-            WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            workManager.enqueueUniquePeriodicWork(
                 UNIQUE_PERIODIC_WORK_ID,
                 ExistingPeriodicWorkPolicy.REPLACE,
                 PeriodicWorkRequestBuilder<SaveSyncWork>(3, TimeUnit.HOURS)
@@ -129,11 +131,13 @@ class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
         }
 
         fun cancelManualWork(applicationContext: Context) {
-            WorkManager.getInstance(applicationContext).cancelUniqueWork(UNIQUE_WORK_ID)
+            WorkManagerGuard.getInstanceOrNull(applicationContext)
+                ?.cancelUniqueWork(UNIQUE_WORK_ID)
         }
 
         fun cancelAutoWork(applicationContext: Context) {
-            WorkManager.getInstance(applicationContext).cancelUniqueWork(UNIQUE_PERIODIC_WORK_ID)
+            WorkManagerGuard.getInstanceOrNull(applicationContext)
+                ?.cancelUniqueWork(UNIQUE_PERIODIC_WORK_ID)
         }
     }
 

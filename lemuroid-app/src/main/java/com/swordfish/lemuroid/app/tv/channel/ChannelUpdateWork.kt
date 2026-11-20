@@ -5,8 +5,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.swordfish.lemuroid.app.utils.android.WorkManagerGuard
 import com.swordfish.lemuroid.lib.injection.AndroidWorkerInjection
 import com.swordfish.lemuroid.lib.injection.WorkerKey
 import dagger.Binds
@@ -36,7 +36,7 @@ class ChannelUpdateWork(context: Context, workerParams: WorkerParameters) :
         private val UNIQUE_WORK_ID: String = ChannelUpdateWork::class.java.simpleName
 
         fun enqueue(applicationContext: Context) {
-            WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+            WorkManagerGuard.getInstanceOrNull(applicationContext)?.enqueueUniqueWork(
                 UNIQUE_WORK_ID,
                 ExistingWorkPolicy.REPLACE,
                 OneTimeWorkRequestBuilder<ChannelUpdateWork>().build(),
@@ -44,7 +44,8 @@ class ChannelUpdateWork(context: Context, workerParams: WorkerParameters) :
         }
 
         fun cancel(applicationContext: Context) {
-            WorkManager.getInstance(applicationContext).cancelUniqueWork(UNIQUE_WORK_ID)
+            WorkManagerGuard.getInstanceOrNull(applicationContext)
+                ?.cancelUniqueWork(UNIQUE_WORK_ID)
         }
     }
 
