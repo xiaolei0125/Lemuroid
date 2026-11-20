@@ -46,7 +46,9 @@ class PendingOperationsMonitor(private val appContext: Context) {
 
     private fun operationInProgress(operation: Operation): Flow<Boolean> {
         val workManager = WorkManagerGuard.getInstanceOrNull(appContext)
-            ?: return WorkManagerGuard.emptyWorkInfoFlow().map { false }
+        if (workManager == null) {
+            return WorkManagerGuard.emptyWorkInfoFlow().map { false }
+        }
         return workManager
             .getWorkInfosForUniqueWorkFlow(operation.uniqueId)
             .map { if (operation.isPeriodic) isPeriodicJobRunning(it) else isJobRunning(it) }

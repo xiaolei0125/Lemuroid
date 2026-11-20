@@ -23,7 +23,6 @@ import timber.log.Timber
  * 安全的空实现，避免进程启动或运行期崩溃。
  */
 object WorkManagerGuard {
-
     /**
      * 判断当前上下文是否处于 device-protected storage 状态（即 WorkManager 无法初始化）。
      */

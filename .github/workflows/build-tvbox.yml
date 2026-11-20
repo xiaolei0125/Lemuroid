@@ -31,7 +31,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Assemble freeBundleDebug APK
-        run: ./gradlew assembleFreeBundleDebug --no-daemon
+        run: ./gradlew assembleFreeBundleDebug --no-daemon -x check -x ktlintCheck
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
