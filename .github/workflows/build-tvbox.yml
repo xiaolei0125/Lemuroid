@@ -3,6 +3,7 @@ name: Build TVBox APK
 # 为电视盒子（魔百盒等 device-protected storage ROM）构建可安装的 APK。
 # 构建 freeBundleDebug 变体：开源版 + 所有核心打包进单 APK，使用仓库自带
 # debug.keystore 签名，无需任何 secret。
+# 通过 splits.abi 只保留 armeabi-v7a，产物体积约 50M（而非全 ABI 的 200M+）。
 on:
   push:
     branches: [ master, main ]

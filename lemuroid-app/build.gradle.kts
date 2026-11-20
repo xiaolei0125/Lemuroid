@@ -105,6 +105,18 @@ android {
         }
     }
 
+    // 只保留 armeabi-v7a ABI，大幅减小 APK 体积。
+    // 目标设备（魔百盒等 32 位 ARM 电视盒子）仅需该 ABI，bundled-cores 的
+    // jniLibs 同时包含 arm64-v8a / x86 / x86_64，全部对目标设备无用。
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a")
+            isUniversalApk = false
+        }
+    }
+
     lint {
         disable += setOf("MissingTranslation", "ExtraTranslation", "EnsureInitializerMetadata")
     }
